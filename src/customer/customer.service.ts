@@ -27,19 +27,29 @@ export class CustomerService {
     );
     const customerEntity = plainToInstance(CustomerEntity, customerDto);
     try {
-      addressEntity = await this.addressRepository.save(addressEntity);
       identificationEntity = await this.identificationRepository.save(
         identificationEntity,
       );
-      customerEntity.address = addressEntity;
+      addressEntity = await this.addressRepository.save(addressEntity);
       customerEntity.identification = identificationEntity;
-      const customer = await this.customerRepository.save(customerEntity);
-      return customer;
+      customerEntity.address = addressEntity;
+      return await this.customerRepository.save(customerEntity);
     } catch (e: any) {
-      throw new BusinessLogicException(
-        e.message ? e.message : 'Ocurrio un error al crear un cliente',
-        BusinessError.BAD_REQUEST,
-      );
+      if (
+        e.table &&
+        e.message &&
+        e.table === 'identification_entity' &&
+        e.message.includes('duplicate')
+      ) {
+        throw new BusinessLogicException(
+          'Ya existe un cliente con ese numero de identificación',
+          BusinessError.CONFLICT,
+        );
+      } else
+        throw new BusinessLogicException(
+          e.message ? e.message : 'Ocurrio un error al crear un cliente',
+          BusinessError.BAD_REQUEST,
+        );
     }
   }
 
