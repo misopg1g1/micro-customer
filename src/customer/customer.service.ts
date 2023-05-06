@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomerEntity } from './customer.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CustomerDto } from './customer.dto';
 import { plainToInstance } from 'class-transformer';
 import { BusinessError, BusinessLogicException } from '../shared/errors';
@@ -62,5 +62,26 @@ export class CustomerService {
       options = { ...options, take: take };
     }
     return await this.customerRepository.find(options);
+  }
+
+  async findOne(id: string, relations: boolean) {
+    let customer: CustomerEntity | undefined = undefined;
+    try {
+      customer = await this.customerRepository.findOne({
+        where: { id },
+        relations: relations ? ['address', 'identification'] : [],
+      });
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        throw new BusinessLogicException(e.message, BusinessError.BAD_REQUEST);
+      }
+    }
+    if (!customer) {
+      throw new BusinessLogicException(
+        'El cliente con el id dado no fue encontrado',
+        BusinessError.NOT_FOUND,
+      );
+    }
+    return customer;
   }
 }

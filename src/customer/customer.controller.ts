@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UseInterceptors,
@@ -12,7 +13,7 @@ import { ApiQuery } from '@nestjs/swagger';
 import { BusinessErrorsInterceptor } from '../shared/interceptors/business-errors.interceptor';
 
 @UseInterceptors(BusinessErrorsInterceptor)
-@Controller('customer')
+@Controller('customers')
 export class CustomerController {
   constructor(private customerService: CustomerService) {}
 
@@ -35,5 +36,18 @@ export class CustomerController {
       transformedRelations = JSON.parse(relations.toLowerCase());
     }
     return await this.customerService.findAll(skip, transformedRelations, take);
+  }
+
+  @Get(':customerId')
+  @ApiQuery({ name: 'relations', required: false, type: Boolean || String })
+  async find(
+    @Param('customerId') customerId: string,
+    @Query('relations') relations: any = false,
+  ) {
+    let transformedRelations = relations;
+    if (typeof relations === 'string') {
+      transformedRelations = JSON.parse(relations.toLowerCase());
+    }
+    return await this.customerService.findOne(customerId, transformedRelations);
   }
 }

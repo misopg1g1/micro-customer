@@ -4,6 +4,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   JoinColumn,
+  BeforeInsert,
 } from 'typeorm';
 import { AddressEntity } from './address.entity';
 import { IdentificationEntity } from './identification.entity';
@@ -22,10 +23,10 @@ export class CustomerEntity {
   @Column()
   last_name: string;
 
-  @Column({ default: false, nullable: true })
+  @Column()
   financial_alert: boolean;
 
-  @Column({ nullable: true })
+  @Column()
   seller_id: string;
 
   @Column()
@@ -41,4 +42,9 @@ export class CustomerEntity {
   @OneToOne(() => IdentificationEntity)
   @JoinColumn()
   identification: IdentificationEntity;
+
+  @BeforeInsert()
+  generateSKU() {
+    this.financial_alert = this.financial_alert || false;
+  }
 }
