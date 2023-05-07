@@ -1,4 +1,4 @@
-export const TypeOrmTestingConfig = (): any => {
+export const TypeOrmTestingConfig = (): object => {
   return {
     type: 'sqlite',
     database: ':memory:',
