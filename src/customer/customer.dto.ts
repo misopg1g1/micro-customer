@@ -52,7 +52,7 @@ export class CustomerDto {
 
   @ValidateNested()
   @Type(() => IdentificationDto)
-  readonly identification: IdentificationDto;
+  identification: IdentificationDto;
 
   constructor(partial: Partial<CustomerDto>) {
     Object.assign(this, partial);
